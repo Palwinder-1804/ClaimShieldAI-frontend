@@ -19,10 +19,10 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  login: async (email, password) => {
+  login: async (email, password, rememberMe = false) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiClient.post("/auth/login", { email, password });
+      const response = await apiClient.post("/auth/login", { email, password, remember_me: rememberMe });
       set({ user: response.data, isAuthenticated: true, isLoading: false });
       return { success: true };
     } catch (err) {

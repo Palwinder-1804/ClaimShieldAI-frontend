@@ -17,6 +17,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState(null);
 
   const from = location.state?.from?.pathname || "/dashboard";
@@ -28,6 +29,15 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, from, clearError]);
 
+  // Pre-fill email if remember me was checked previously
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("remembered_email");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setValidationError(null);
@@ -35,14 +45,20 @@ const Login = () => {
       setValidationError("Please fill in all credentials.");
       return;
     }
-    const result = await login(email, password);
+    const result = await login(email, password, rememberMe);
     if (result.success) {
+      if (rememberMe) {
+        localStorage.setItem("remembered_email", email);
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
       navigate(from, { replace: true });
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google";
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   return (
@@ -111,6 +127,31 @@ const Login = () => {
                 className="glass-input !pl-12"
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-between pb-1">
+            <label className="flex items-center gap-2 cursor-pointer group select-none">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="h-5 w-5 rounded-md border border-white/20 bg-white/5 transition-all duration-300 peer-checked:bg-gradient-to-br peer-checked:from-aurora-purple peer-checked:to-aurora-cyan peer-checked:border-transparent peer-hover:border-aurora-cyan/50 flex items-center justify-center shadow-inner" />
+                <svg
+                  className="absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 pointer-events-none stroke-current"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  strokeWidth="4"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-slate-300 group-hover:text-white transition duration-200">
+                Remember Me
+              </span>
+            </label>
           </div>
 
           {(validationError || error) && (

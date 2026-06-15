@@ -62,7 +62,7 @@ const ClaimDetail = () => {
                 {currentClaim.documents?.map((doc, idx) => (
                   <a
                     key={idx}
-                    href={`http://localhost:8000/claims/download/${doc}`}
+                    href={`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/claims/download/${doc}`}
                     target="_blank"
                     rel="noreferrer"
                     className="bg-white/5 border border-white/10 text-[10px] hover:text-white px-4 py-2 rounded-xl font-mono hover:bg-white/10 transition shadow-glass"

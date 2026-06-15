@@ -6,6 +6,7 @@ import ClaimReport from "../components/claim/ClaimReport";
 import Navbar from "../components/common/Navbar";
 import Loader from "../components/common/Loader";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { BACKEND_URL } from "../api/apiClient";
 
 const ClaimDetail = () => {
   const { claimId } = useParams();
@@ -62,7 +63,7 @@ const ClaimDetail = () => {
                 {currentClaim.documents?.map((doc, idx) => (
                   <a
                     key={idx}
-                    href={`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/claims/download/${doc}`}
+                    href={`${BACKEND_URL}/claims/download/${doc}`}
                     target="_blank"
                     rel="noreferrer"
                     className="bg-white/5 border border-white/10 text-[10px] hover:text-white px-4 py-2 rounded-xl font-mono hover:bg-white/10 transition shadow-glass"

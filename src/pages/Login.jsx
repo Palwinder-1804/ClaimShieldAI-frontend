@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
 import { Shield, KeyRound, Mail, AlertCircle, ArrowLeft } from "lucide-react";
+import { BACKEND_URL } from "../api/apiClient";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -57,8 +58,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-    window.location.href = `${apiUrl}/auth/google`;
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   return (

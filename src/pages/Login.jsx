@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
-import { Shield, KeyRound, Mail, AlertCircle, ArrowLeft, CheckCircle, HelpCircle } from "lucide-react";
+import { Shield, KeyRound, Mail, AlertCircle, ArrowLeft, CheckCircle, HelpCircle, Eye, EyeOff } from "lucide-react";
 import { BACKEND_URL } from "../api/apiClient";
 
 const pageVariants = {
@@ -18,6 +18,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState(null);
   const [verificationMessage, setVerificationMessage] = useState(null);
@@ -166,12 +167,19 @@ const Login = () => {
             <div className="relative">
               <KeyRound className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="glass-input !pl-12"
+                className="glass-input !pl-12 !pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition duration-200"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
-import { Shield, KeyRound, Mail, User, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import { Shield, KeyRound, Mail, User, AlertCircle, CheckCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -17,6 +17,8 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationError, setValidationError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -110,8 +112,28 @@ const Register = () => {
             {[
               { label: "Full Name", icon: User, type: "text", value: fullName, set: setFullName, placeholder: "Palwinder Singh" },
               { label: "Email Address", icon: Mail, type: "email", value: email, set: setEmail, placeholder: "palwinder@company.com" },
-              { label: "Password", icon: KeyRound, type: "password", value: password, set: setPassword, placeholder: "Min 8 characters" },
-              { label: "Confirm Password", icon: KeyRound, type: "password", value: confirmPassword, set: setConfirmPassword, placeholder: "Re-enter password" },
+              { 
+                label: "Password", 
+                icon: KeyRound, 
+                type: showPassword ? "text" : "password", 
+                value: password, 
+                set: setPassword, 
+                placeholder: "Min 8 characters",
+                hasToggle: true,
+                isToggled: showPassword,
+                onToggle: () => setShowPassword(!showPassword)
+              },
+              { 
+                label: "Confirm Password", 
+                icon: KeyRound, 
+                type: showConfirmPassword ? "text" : "password", 
+                value: confirmPassword, 
+                set: setConfirmPassword, 
+                placeholder: "Re-enter password",
+                hasToggle: true,
+                isToggled: showConfirmPassword,
+                onToggle: () => setShowConfirmPassword(!showConfirmPassword)
+              },
             ].map((field) => {
               const Icon = field.icon;
               return (
@@ -124,8 +146,17 @@ const Register = () => {
                       value={field.value}
                       onChange={(e) => field.set(e.target.value)}
                       placeholder={field.placeholder}
-                      className={inputClass}
+                      className={`${inputClass} ${field.hasToggle ? "!pr-10" : ""}`}
                     />
+                    {field.hasToggle && (
+                      <button
+                        type="button"
+                        onClick={field.onToggle}
+                        className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition duration-200"
+                      >
+                        {field.isToggled ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    )}
                   </div>
                 </div>
               );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
-import { Shield, KeyRound, Mail, AlertCircle, ArrowLeft } from "lucide-react";
+import { Shield, KeyRound, Mail, AlertCircle, ArrowLeft, CheckCircle, HelpCircle } from "lucide-react";
 import { BACKEND_URL } from "../api/apiClient";
 
 const pageVariants = {
@@ -20,6 +20,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [validationError, setValidationError] = useState(null);
+  const [verificationMessage, setVerificationMessage] = useState(null);
 
   const from = location.state?.from?.pathname || "/dashboard";
 
@@ -29,6 +30,32 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, from, clearError]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const verified = params.get("verified");
+    if (verified === "success") {
+      setVerificationMessage({
+        type: "success",
+        text: "Email verified successfully! You can now log in."
+      });
+    } else if (verified === "already") {
+      setVerificationMessage({
+        type: "info",
+        text: "Your email is already verified. Please log in."
+      });
+    } else if (verified === "error") {
+      const reason = params.get("reason");
+      let text = "Failed to verify email. The token might be invalid or expired.";
+      if (reason === "user_not_found") {
+        text = "User not found. Please register again.";
+      }
+      setVerificationMessage({
+        type: "error",
+        text: text
+      });
+    }
+  }, [location]);
 
   // Pre-fill email if remember me was checked previously
   useEffect(() => {
@@ -99,6 +126,25 @@ const Login = () => {
             <p className="text-slate-400 text-sm mt-1">Sign in to your ClaimShield console</p>
           </div>
         </div>
+
+        {verificationMessage && (
+          <motion.div
+            className={`flex items-center gap-2 text-xs font-semibold p-4 rounded-xl border ${
+              verificationMessage.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                : verificationMessage.type === "info"
+                ? "bg-sky-500/10 border-sky-500/20 text-sky-400"
+                : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+            }`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {verificationMessage.type === "success" && <CheckCircle className="h-4.5 w-4.5 text-emerald-400 flex-shrink-0" />}
+            {verificationMessage.type === "info" && <HelpCircle className="h-4.5 w-4.5 text-sky-400 flex-shrink-0" />}
+            {verificationMessage.type === "error" && <AlertCircle className="h-4.5 w-4.5 text-rose-400 flex-shrink-0" />}
+            <span>{verificationMessage.text}</span>
+          </motion.div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">

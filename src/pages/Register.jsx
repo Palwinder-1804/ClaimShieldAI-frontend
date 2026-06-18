@@ -108,8 +108,8 @@ const Register = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {[
-              { label: "Full Name", icon: User, type: "text", value: fullName, set: setFullName, placeholder: "John Doe" },
-              { label: "Email Address", icon: Mail, type: "email", value: email, set: setEmail, placeholder: "john@company.com" },
+              { label: "Full Name", icon: User, type: "text", value: fullName, set: setFullName, placeholder: "Palwinder Singh" },
+              { label: "Email Address", icon: Mail, type: "email", value: email, set: setEmail, placeholder: "palwinder@company.com" },
               { label: "Password", icon: KeyRound, type: "password", value: password, set: setPassword, placeholder: "Min 8 characters" },
               { label: "Confirm Password", icon: KeyRound, type: "password", value: confirmPassword, set: setConfirmPassword, placeholder: "Re-enter password" },
             ].map((field) => {

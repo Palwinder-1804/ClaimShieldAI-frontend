@@ -73,7 +73,7 @@ const Onboarding = () => {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="John Doe"
+                placeholder="Palwinder Singh"
                 className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-slate-800 text-sm placeholder-slate-400 outline-none focus:border-insurance-blue focus:ring-2 focus:ring-insurance-blue/20 transition"
               />
             </div>

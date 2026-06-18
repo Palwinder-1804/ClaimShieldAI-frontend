@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useClaimStore } from "../../store/claimStore";
 import StatusBadge from "../common/StatusBadge";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { Star, MessageSquare, AlertCircle, CheckCircle, Trash2, Download, Printer } from "lucide-react";
+import { Star, MessageSquare, AlertCircle, CheckCircle, Trash2, Download, Printer, HelpCircle, X } from "lucide-react";
+import { policyChatApi } from "../../api/policyChat";
+import apiClient from "../../api/apiClient";
 
 const ClaimReport = ({ claim }) => {
   const navigate = useNavigate();
@@ -14,6 +16,40 @@ const ClaimReport = ({ claim }) => {
   const [submitted, setSubmitted] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  
+  const [showClaimStepsModal, setShowClaimStepsModal] = useState(false);
+  const [claimingStepsText, setClaimingStepsText] = useState("");
+  const [loadingSteps, setLoadingSteps] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+
+  const fetchClaimingSteps = async () => {
+    setLoadingSteps(true);
+    setFetchError(null);
+    try {
+      let policyId = claim.policy_match?.policy_id;
+      
+      if (!policyId) {
+        // Fallback: list all policies and take the first one
+        const response = await apiClient.get("/policy");
+        const policies = response.data;
+        if (policies && policies.length > 0) {
+          policyId = policies[0].id;
+        }
+      }
+      
+      if (!policyId) {
+        throw new Error("No policy document associated with this claim or system index.");
+      }
+      
+      const result = await policyChatApi.getClaimSteps(policyId);
+      setClaimingStepsText(result.steps);
+      setShowClaimStepsModal(true);
+    } catch (err) {
+      setFetchError(err.response?.data?.detail || err.message || "Failed to fetch claiming steps dynamically.");
+    } finally {
+      setLoadingSteps(false);
+    }
+  };
 
   const downloadMarkdown = () => {
     if (!claim.report) return;
@@ -87,6 +123,19 @@ const ClaimReport = ({ claim }) => {
           {claim.report && (
             <div className="flex items-center gap-2">
               <button
+                onClick={fetchClaimingSteps}
+                disabled={loadingSteps}
+                title="How to Claim"
+                className="flex items-center gap-1 bg-white/5 hover:bg-white/10 text-slate-350 font-semibold text-[10px] py-1.5 px-3 rounded-lg border border-white/10 transition disabled:opacity-60"
+              >
+                {loadingSteps ? (
+                  <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <HelpCircle className="h-3.5 w-3.5 text-aurora-cyan" />
+                )}
+                How to Claim
+              </button>
+              <button
                 onClick={downloadMarkdown}
                 title="Download Markdown"
                 className="flex items-center gap-1 bg-white/5 hover:bg-white/10 text-slate-300 font-semibold text-[10px] py-1.5 px-3 rounded-lg border border-white/10 transition"
@@ -113,6 +162,13 @@ const ClaimReport = ({ claim }) => {
             </div>
           )}
         </div>
+        
+        {fetchError && (
+          <div className="flex items-center gap-1.5 text-rose-450 text-xs font-semibold bg-rose-950/20 border border-rose-900/40 p-3.5 rounded-2xl">
+            <AlertCircle className="h-4 w-4 text-rose-450 flex-shrink-0" />
+            <span>{fetchError}</span>
+          </div>
+        )}
 
         {/* Delete Confirmation Modal / Banner */}
         {showConfirmDelete && (
@@ -282,6 +338,42 @@ const ClaimReport = ({ claim }) => {
           </form>
         )}
       </div>
+
+      {/* Dynamic Claiming Steps Modal */}
+      {showClaimStepsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="glass-panel w-full max-w-2xl rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.15)] flex flex-col max-h-[85vh]">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-white/10 bg-white/5">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <HelpCircle className="h-4.5 w-4.5 text-aurora-cyan" />
+                Claiming Procedures Guide
+              </h3>
+              <button 
+                onClick={() => setShowClaimStepsModal(false)}
+                className="text-slate-400 hover:text-white transition p-1.5 bg-white/5 rounded-lg hover:bg-white/10 border border-white/10"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-300 leading-relaxed font-sans custom-scrollbar">
+              <MarkdownRenderer content={claimingStepsText} />
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-white/10 bg-black/20 flex justify-end">
+              <button
+                onClick={() => setShowClaimStepsModal(false)}
+                className="btn-primary text-xs py-2 px-4"
+              >
+                Dismiss Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
